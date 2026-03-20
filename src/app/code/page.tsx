@@ -47,7 +47,7 @@ export default function CodeArenaPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] via-[#f3f8ff] to-[#edf4ff]">
       {stage === 'select' ? (
         <ChallengeSelector
           topics={CODE_TOPICS}
@@ -77,24 +77,24 @@ function ChallengeSelector({
   const [diff, setDiff] = useState<'easy' | 'medium' | 'hard'>('medium')
 
   const DIFF = {
-    easy:   { color: 'border-emerald-600 bg-emerald-900/20 text-emerald-400', desc: 'Warm up' },
-    medium: { color: 'border-yellow-600 bg-yellow-900/20 text-yellow-400',   desc: 'Interview level' },
-    hard:   { color: 'border-red-600 bg-red-900/20 text-red-400',             desc: 'Competitive' },
+    easy:   { color: 'border-emerald-300 bg-emerald-50 text-emerald-700', desc: 'Warm up' },
+    medium: { color: 'border-yellow-300 bg-yellow-50 text-yellow-700',   desc: 'Interview level' },
+    hard:   { color: 'border-red-300 bg-red-50 text-red-700',             desc: 'Competitive' },
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 w-full max-w-7xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard" className="text-slate-400 hover:text-slate-200 text-sm">← Dashboard</Link>
+        <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 text-sm">← Dashboard</Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Code Arena</h1>
-          <p className="text-slate-400 text-sm">Personalised challenges · Mistake memory · Smart hints</p>
+          <h1 className="text-2xl font-bold text-slate-900">Code Arena</h1>
+          <p className="text-slate-600 text-sm">Personalised challenges · Mistake memory · Smart hints</p>
         </div>
       </div>
 
       {/* Difficulty */}
-      <div className="card mb-5">
-        <h2 className="font-medium text-slate-300 mb-3">Difficulty</h2>
+      <div className="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm mb-5">
+        <h2 className="font-medium text-slate-900 mb-3">Difficulty</h2>
         <div className="flex gap-3">
           {(Object.entries(DIFF) as [string, typeof DIFF.easy][]).map(([key, cfg]) => (
             <button
@@ -103,7 +103,7 @@ function ChallengeSelector({
               className={`flex-1 border rounded-xl p-3 transition-all ${
                 diff === key
                   ? cfg.color + ' border-2'
-                  : 'border-[#1e3a5f] bg-[#1a1a2e] text-slate-400 hover:border-slate-500'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300'
               }`}
             >
               <div className="font-medium text-sm capitalize">{key}</div>
@@ -114,8 +114,8 @@ function ChallengeSelector({
       </div>
 
       {/* Topics */}
-      <div className="card mb-5">
-        <h2 className="font-medium text-slate-300 mb-3">Topic</h2>
+      <div className="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm mb-5">
+        <h2 className="font-medium text-slate-900 mb-3">Topic</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {topics.map((t) => (
             <button
@@ -123,8 +123,8 @@ function ChallengeSelector({
               onClick={() => setSelected(t)}
               className={`p-3 rounded-xl text-sm text-left transition-all border ${
                 selected === t
-                  ? 'border-violet-500 bg-violet-900/30 text-violet-300'
-                  : 'border-[#1e3a5f] bg-[#1a1a2e] text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300 hover:text-slate-900'
               }`}
             >
               {t}
@@ -134,11 +134,11 @@ function ChallengeSelector({
       </div>
 
       {/* Memory note */}
-      <div className="bg-violet-900/10 border border-violet-800/30 rounded-xl p-4 mb-6 flex gap-3">
-        <span className="text-violet-400 text-lg">🧠</span>
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex gap-3">
+        <span className="text-blue-600 text-lg">🧠</span>
         <div>
-          <p className="text-sm text-violet-300 font-medium">Challenges built from your mistake memory</p>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <p className="text-sm text-blue-700 font-medium">Challenges built from your mistake memory</p>
+          <p className="text-xs text-slate-600 mt-0.5">
             Hindsight checks your past coding errors — off-by-one, skipped edge cases, wrong complexity —
             and generates a problem that targets your exact weak patterns.
           </p>

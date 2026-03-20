@@ -18,9 +18,9 @@ interface DayPlan {
 }
 
 const TYPE_CONFIG = {
-  quiz:     { icon: '📝', color: 'text-violet-400',  bg: 'bg-violet-900/20 border-violet-800/30' },
-  coding:   { icon: '💻', color: 'text-cyan-400',    bg: 'bg-cyan-900/20 border-cyan-800/30' },
-  revision: { icon: '📖', color: 'text-amber-400',   bg: 'bg-amber-900/20 border-amber-800/30' },
+  quiz:     { icon: '📝', color: 'text-blue-700',  bg: 'bg-blue-50 border-blue-200' },
+  coding:   { icon: '💻', color: 'text-cyan-700',    bg: 'bg-cyan-50 border-cyan-200' },
+  revision: { icon: '📖', color: 'text-amber-700',   bg: 'bg-amber-50 border-amber-200' },
 }
 
 const PRIORITY_CONFIG = {
@@ -74,36 +74,37 @@ export default function StudyPlanPage() {
   const activeDay = plan.find(d => d.day === selectedDay)
 
   return (
-    <div className="min-h-screen p-6 max-w-6xl mx-auto">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] via-[#f3f8ff] to-[#edf4ff]">
+      <div className="p-6 w-full max-w-7xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
-        <Link href="/dashboard" className="text-slate-400 hover:text-slate-200 text-sm">
+        <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 text-sm">
           ← Dashboard
         </Link>
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-100">Study Plan</h1>
-            <span className="text-xs bg-violet-900/40 text-violet-400 px-2 py-1 rounded-full border border-violet-700/40">
+            <h1 className="text-2xl font-bold text-slate-900">Study Plan</h1>
+            <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full border border-blue-200">
               Memory-Powered
             </span>
           </div>
-          <p className="text-slate-400 text-sm mt-0.5">
+          <p className="text-slate-600 text-sm mt-0.5">
             AI builds your plan from Hindsight memory — your weak topics, mistakes, behaviour
           </p>
         </div>
       </div>
 
       {/* Config */}
-      <div className="card mb-6">
-        <h2 className="font-semibold text-slate-200 mb-1">Generate Your Plan</h2>
-        <p className="text-sm text-slate-400 mb-5">
+      <div className="bg-white border border-blue-100 rounded-2xl p-6 shadow-sm mb-6">
+        <h2 className="font-semibold text-slate-900 mb-1">Generate Your Plan</h2>
+        <p className="text-sm text-slate-600 mb-5">
           Hindsight analyses your mistake history and weak topics to build a personalised 7-day schedule.
         </p>
 
         <div className="flex flex-wrap gap-6 items-end">
           <div>
-            <label className="text-xs text-slate-400 mb-1.5 block">Exam Date (optional)</label>
+            <label className="text-xs text-slate-600 mb-1.5 block">Exam Date (optional)</label>
             <input
               type="date"
               value={examDate}
@@ -113,8 +114,8 @@ export default function StudyPlanPage() {
           </div>
 
           <div>
-            <label className="text-xs text-slate-400 mb-1.5 block">
-              Daily study hours: <span className="text-violet-400 font-medium">{dailyHours}h</span>
+            <label className="text-xs text-slate-600 mb-1.5 block">
+              Daily study hours: <span className="text-blue-700 font-medium">{dailyHours}h</span>
             </label>
             <div className="flex items-center gap-3">
               <span className="text-xs text-slate-500">1h</span>
@@ -144,9 +145,9 @@ export default function StudyPlanPage() {
         </div>
 
         {/* Hindsight note */}
-        <div className="mt-4 bg-violet-900/10 border border-violet-800/30 rounded-xl p-3 flex gap-3">
-          <span className="text-violet-400">🧠</span>
-          <p className="text-xs text-slate-400">
+        <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-3 flex gap-3">
+          <span className="text-blue-600">🧠</span>
+          <p className="text-xs text-slate-600">
             Your plan is personalised using Hindsight memory — topics you scored low on get
             scheduled first, subjects with repeated mistakes get extra revision sessions.
           </p>
@@ -163,7 +164,7 @@ export default function StudyPlanPage() {
               { label: 'Total Hours',    value: `${Math.round(totalMinutes/60)}h`, color: 'text-emerald-400' },
               { label: 'High Priority',  value: highPriority,                    color: 'text-red-400' },
             ].map(s => (
-              <div key={s.label} className="card text-center">
+              <div key={s.label} className="bg-white border border-blue-100 rounded-xl p-4 text-center shadow-sm">
                 <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
                 <div className="text-xs text-slate-500 mt-1">{s.label}</div>
               </div>
@@ -172,11 +173,11 @@ export default function StudyPlanPage() {
 
           {/* Summary banner */}
           {summary && (
-            <div className="bg-violet-900/20 border border-violet-700/40 rounded-xl p-4 mb-6 flex gap-3">
-              <span className="text-violet-400 text-lg flex-shrink-0">🎯</span>
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex gap-3">
+              <span className="text-blue-600 text-lg flex-shrink-0">🎯</span>
               <div>
-                <p className="text-xs text-violet-400 font-medium mb-0.5">Plan Summary</p>
-                <p className="text-sm text-slate-300">{summary}</p>
+                <p className="text-xs text-blue-700 font-medium mb-0.5">Plan Summary</p>
+                <p className="text-sm text-slate-700">{summary}</p>
               </div>
             </div>
           )}
@@ -185,8 +186,8 @@ export default function StudyPlanPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {/* Day pills */}
-            <div className="card lg:col-span-1">
-              <h2 className="font-semibold text-slate-200 mb-3">7-Day Schedule</h2>
+            <div className="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm lg:col-span-1">
+              <h2 className="font-semibold text-slate-900 mb-3">7-Day Schedule</h2>
               <div className="space-y-2">
                 {plan.map(day => {
                   const dayMinutes = day.sessions.reduce((s, sess) => s + sess.duration, 0)
@@ -197,14 +198,14 @@ export default function StudyPlanPage() {
                       onClick={() => setSelectedDay(day.day)}
                       className={`w-full text-left p-3 rounded-xl border transition-all ${
                         selectedDay === day.day
-                          ? 'border-violet-500 bg-violet-900/30'
-                          : 'border-[#1e3a5f] bg-[#1a1a2e] hover:border-slate-500'
+                            ? 'border-blue-400 bg-blue-50'
+                            : 'border-slate-200 bg-white hover:border-blue-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-medium ${
-                            selectedDay === day.day ? 'text-violet-300' : 'text-slate-200'
+                            selectedDay === day.day ? 'text-blue-700' : 'text-slate-800'
                           }`}>
                             Day {day.day}
                           </span>
@@ -224,12 +225,12 @@ export default function StudyPlanPage() {
             </div>
 
             {/* Day detail */}
-            <div className="card lg:col-span-2">
+            <div className="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm lg:col-span-2">
               {activeDay ? (
                 <>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h2 className="font-semibold text-slate-200">Day {activeDay.day}</h2>
+                      <h2 className="font-semibold text-slate-900">Day {activeDay.day}</h2>
                       <p className="text-xs text-slate-500">{activeDay.date}</p>
                     </div>
                     <div className="text-xs text-slate-400">
@@ -248,7 +249,7 @@ export default function StudyPlanPage() {
                             <div className="flex items-center gap-2 flex-1 min-w-0">
                               <span>{tc.icon}</span>
                               <div className="min-w-0">
-                                <div className="font-medium text-slate-200 text-sm truncate">
+                                <div className="font-medium text-slate-900 text-sm truncate">
                                   {sess.topic}
                                 </div>
                                 {sess.reason && (
@@ -272,7 +273,7 @@ export default function StudyPlanPage() {
                   </div>
 
                   {/* Action buttons */}
-                  <div className="flex gap-3 mt-4 pt-4 border-t border-[#1e3a5f]">
+                  <div className="flex gap-3 mt-4 pt-4 border-t border-slate-200">
                     {activeDay.sessions[0]?.type === 'coding' ? (
                       <Link href="/code" className="btn-primary flex-1 text-center text-sm py-2">
                         Start coding session →
@@ -303,10 +304,10 @@ export default function StudyPlanPage() {
 
       {/* Empty state */}
       {!generated && !loading && (
-        <div className="card text-center py-16">
+        <div className="bg-white border border-blue-100 rounded-2xl p-10 text-center shadow-sm">
           <div className="text-5xl mb-4">📅</div>
-          <h2 className="text-lg font-semibold text-slate-200 mb-2">No plan generated yet</h2>
-          <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
+          <h2 className="text-lg font-semibold text-slate-900 mb-2">No plan generated yet</h2>
+          <p className="text-slate-600 text-sm mb-6 max-w-md mx-auto">
             Hit Generate Plan above — Hindsight will analyse your mistake history
             and weak topics to build a personalised schedule.
           </p>
@@ -321,6 +322,7 @@ export default function StudyPlanPage() {
         </div>
       )}
 
+      </div>
     </div>
   )
 }

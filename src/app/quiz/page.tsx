@@ -128,34 +128,36 @@ export default function QuizPage() {
   }
 
   return (
-    <div className="min-h-screen p-6 max-w-4xl mx-auto">
-      {stage === 'select' && (
-        <TopicSelector
-          topics={TOPICS}
-          onStart={startQuiz}
-          loading={loading}
-        />
-      )}
-      {stage === 'running' && questions.length > 0 && (
-        <QuizRunner
-          questions={questions}
-          topic={selectedTopic}
-          difficulty={difficulty}
-          onComplete={submitQuiz}
-        />
-      )}
-      {stage === 'results' && (
-        <QuizResults
-          attempts={attempts}
-          score={score}
-          topic={selectedTopic}
-          remediation={remediation}
-          buildingRemediation={buildingRemediation}
-          onStartPractice={startAdaptivePractice}
-          practiceRound={practiceRound}
-          onRestart={restart}
-        />
-      )}
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] via-[#f3f8ff] to-[#edf4ff]">
+      <div className="w-full max-w-7xl mx-auto p-6">
+        {stage === 'select' && (
+          <TopicSelector
+            topics={TOPICS}
+            onStart={startQuiz}
+            loading={loading}
+          />
+        )}
+        {stage === 'running' && questions.length > 0 && (
+          <QuizRunner
+            questions={questions}
+            topic={selectedTopic}
+            difficulty={difficulty}
+            onComplete={submitQuiz}
+          />
+        )}
+        {stage === 'results' && (
+          <QuizResults
+            attempts={attempts}
+            score={score}
+            topic={selectedTopic}
+            remediation={remediation}
+            buildingRemediation={buildingRemediation}
+            onStartPractice={startAdaptivePractice}
+            practiceRound={practiceRound}
+            onRestart={restart}
+          />
+        )}
+      </div>
     </div>
   )
 }

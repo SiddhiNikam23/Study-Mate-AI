@@ -112,21 +112,21 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
   ]
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#f3f8ff]">
 
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1e3a5f] bg-[#0f0f1a] flex-shrink-0">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-blue-200 bg-white flex-shrink-0">
         <div className="flex items-center gap-3">
-          <button onClick={onExit} className="text-slate-400 hover:text-slate-200 text-sm">← Exit</button>
-          <span className="text-slate-200 font-medium text-sm">{challenge.title}</span>
+          <button onClick={onExit} className="text-slate-600 hover:text-slate-900 text-sm">← Exit</button>
+          <span className="text-slate-900 font-medium text-sm">{challenge.title}</span>
           <span className={`badge-${difficulty}`}>{difficulty}</span>
-          <span className="text-xs bg-[#1e3a5f] text-slate-400 px-2 py-0.5 rounded-full">{topic}</span>
+          <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">{topic}</span>
         </div>
         <div className="flex items-center gap-2">
           {solved && (
             <span className="text-emerald-400 text-sm font-medium animate-pulse">✓ Solved!</span>
           )}
-          <span className="text-xs text-slate-500">Attempts: {attempts}</span>
+          <span className="text-xs text-slate-600">Attempts: {attempts}</span>
           <button
             onClick={runCode}
             disabled={running}
@@ -141,18 +141,18 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
       <div className="flex flex-1 overflow-hidden">
 
         {/* LEFT PANEL */}
-        <div className="w-[42%] flex flex-col border-r border-[#1e3a5f] overflow-hidden">
+        <div className="w-[42%] flex flex-col border-r border-blue-200 overflow-hidden bg-white">
 
           {/* Tabs */}
-          <div className="flex border-b border-[#1e3a5f] flex-shrink-0">
+          <div className="flex border-b border-blue-200 flex-shrink-0 bg-white flex-shrink-0">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 className={`px-4 py-2.5 text-sm transition-colors ${
                   activeTab === t.id
-                    ? 'text-violet-400 border-b-2 border-violet-500 bg-[#1a1a2e]'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'text-blue-700 border-b-2 border-blue-600 bg-blue-50'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 {t.label}
@@ -191,11 +191,11 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
 
         {/* RIGHT PANEL — Monaco Editor */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-[#1e3a5f] flex-shrink-0">
-            <span className="text-xs text-slate-400">Python 3</span>
+          <div className="flex items-center justify-between px-4 py-2 border-b border-blue-200 flex-shrink-0 bg-white">
+            <span className="text-xs text-slate-600">Python 3</span>
             <button
               onClick={() => setCode(challenge.starterCode)}
-              className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              className="text-xs text-slate-500 hover:text-slate-800 transition-colors"
             >
               Reset code
             </button>
@@ -207,7 +207,7 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
               value={code}
               onChange={(v) => setCode(v ?? '')}
               onMount={(editor) => { editorRef.current = editor }}
-              theme="vs-dark"
+              theme="vs-light"
               options={{
                 fontSize: 14,
                 fontFamily: 'JetBrains Mono, Fira Code, monospace',
@@ -234,25 +234,25 @@ function ProblemPanel({ challenge }: { challenge: CodeChallenge }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-slate-100 mb-2">{challenge.title}</h2>
-        <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+        <h2 className="text-lg font-semibold text-slate-900 mb-2">{challenge.title}</h2>
+        <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
           {challenge.description}
         </p>
       </div>
 
       {challenge.testCases?.length > 0 && (
         <div>
-          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+          <h3 className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">
             Examples
           </h3>
           <div className="space-y-2">
             {challenge.testCases.slice(0, 3).map((tc, i) => (
-              <div key={i} className="bg-[#1a1a2e] rounded-lg p-3 border border-[#1e3a5f]/50 font-mono text-xs">
-                <div className="text-slate-400">
-                  <span className="text-violet-400">Input:</span> {tc.input}
+              <div key={i} className="bg-slate-50 rounded-lg p-3 border border-slate-200 font-mono text-xs">
+                <div className="text-slate-700">
+                  <span className="text-blue-700">Input:</span> {tc.input}
                 </div>
-                <div className="text-slate-400 mt-1">
-                  <span className="text-emerald-400">Output:</span> {tc.expected}
+                <div className="text-slate-700 mt-1">
+                  <span className="text-emerald-700">Output:</span> {tc.expected}
                 </div>
               </div>
             ))}
@@ -260,9 +260,9 @@ function ProblemPanel({ challenge }: { challenge: CodeChallenge }) {
         </div>
       )}
 
-      <div className="bg-violet-900/10 border border-violet-800/30 rounded-xl p-3">
-        <p className="text-xs text-violet-400 font-medium mb-1">🧠 Personalised challenge</p>
-        <p className="text-xs text-slate-500">
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+        <p className="text-xs text-blue-700 font-medium mb-1">🧠 Personalised challenge</p>
+        <p className="text-xs text-slate-600">
           This problem was generated based on your past coding mistakes stored in Hindsight memory.
         </p>
       </div>

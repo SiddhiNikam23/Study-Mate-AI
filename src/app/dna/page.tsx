@@ -65,25 +65,26 @@ export default function DNAPage() {
   ] as const
 
   return (
-    <div className="min-h-screen p-6 max-w-6xl mx-auto">
+    <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] via-[#f3f8ff] to-[#edf4ff] [&_.card]:bg-white [&_.card]:border-blue-100 [&_.card]:shadow-sm">
+      <div className="p-6 max-w-7xl mx-auto">
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-slate-400 hover:text-slate-200 text-sm">← Dashboard</Link>
+          <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 text-sm">← Dashboard</Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-slate-100">Learning DNA</h1>
-              <span className="text-xs bg-violet-900/40 text-violet-400 px-2 py-1 rounded-full border border-violet-700/40">
+              <h1 className="text-2xl font-bold text-slate-900">Learning DNA</h1>
+              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full border border-blue-200">
                 Hindsight Memory
               </span>
             </div>
-            <p className="text-slate-400 text-sm mt-0.5">Your complete learning profile — concepts, patterns, behaviour</p>
+            <p className="text-slate-600 text-sm mt-0.5">Your complete learning profile — concepts, patterns, behaviour</p>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-3xl font-bold text-violet-400">{data?.streak ?? 0} 🔥</div>
-          <div className="text-xs text-slate-400">day streak</div>
+          <div className="text-3xl font-bold text-blue-700">{data?.streak ?? 0} 🔥</div>
+          <div className="text-xs text-slate-600">day streak</div>
         </div>
       </div>
 
@@ -117,15 +118,15 @@ export default function DNAPage() {
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-1 mb-6 bg-[#1a1a2e] p-1 rounded-xl w-fit">
+      <div className="flex gap-1 mb-6 bg-white border border-blue-100 p-1 rounded-xl w-fit shadow-sm">
         {SECTIONS.map(s => (
           <button
             key={s.id}
             onClick={() => setActiveSection(s.id)}
             className={`px-4 py-2 rounded-lg text-sm transition-all flex items-center gap-1.5 ${
               activeSection === s.id
-                ? 'bg-violet-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-blue-600 text-white'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <span>{s.icon}</span>
@@ -141,15 +142,15 @@ export default function DNAPage() {
 
             {/* Radar */}
             <div className="card">
-              <h2 className="font-semibold text-slate-200 mb-1">Topic Mastery Radar</h2>
+              <h2 className="font-semibold text-slate-900 mb-1">Topic Mastery Radar</h2>
               <p className="text-xs text-slate-500 mb-4">Your strengths vs weaknesses at a glance</p>
               {radarData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <RadarChart data={radarData}>
-                    <PolarGrid stroke="#1e3a5f" />
-                    <PolarAngleAxis dataKey="topic" tick={{ fill: '#94a3b8', fontSize: 12 }} />
+                    <PolarGrid stroke="#cbd5e1" />
+                    <PolarAngleAxis dataKey="topic" tick={{ fill: '#334155', fontSize: 12 }} />
                     <Radar name="Score" dataKey="score"
-                      stroke="#7c3aed" fill="#7c3aed" fillOpacity={0.35} strokeWidth={2} />
+                      stroke="#2563eb" fill="#2563eb" fillOpacity={0.3} strokeWidth={2} />
                   </RadarChart>
                 </ResponsiveContainer>
               ) : <EmptyState msg="Complete quizzes to build your radar" />}
@@ -159,19 +160,19 @@ export default function DNAPage() {
             <div className="card">
               <div className="flex items-center gap-2 mb-3">
                 <span>🧬</span>
-                <h2 className="font-semibold text-slate-200">AI Analysis</h2>
-                <span className="text-xs bg-violet-900/30 text-violet-400 px-2 py-0.5 rounded-full">
+                <h2 className="font-semibold text-slate-900">AI Analysis</h2>
+                <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
                   Hindsight reflect
                 </span>
               </div>
               {data?.dnaSummary ? (
-                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
                   {data.dnaSummary}
                 </p>
               ) : (
                 <div className="text-sm text-slate-500">
                   <p>No analysis yet. Complete a few quizzes first.</p>
-                  <Link href="/quiz" className="text-violet-400 hover:text-violet-300 mt-2 inline-block text-sm">
+                  <Link href="/quiz" className="text-blue-700 hover:text-blue-800 mt-2 inline-block text-sm">
                     Take a quiz →
                   </Link>
                 </div>
@@ -189,8 +190,8 @@ export default function DNAPage() {
                 <div className="space-y-2">
                   {weakTopics.map((t, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 w-32 truncate">{t.topic}</span>
-                      <div className="flex-1 h-2 bg-[#1a1a2e] rounded-full overflow-hidden">
+                      <span className="text-xs text-slate-600 w-32 truncate">{t.topic}</span>
+                      <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-red-500 rounded-full transition-all"
                           style={{ width: `${t.avg}%` }}
@@ -213,8 +214,8 @@ export default function DNAPage() {
                 <div className="space-y-2">
                   {strongTopics.map((t, i) => (
                     <div key={i} className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 w-32 truncate">{t.topic}</span>
-                      <div className="flex-1 h-2 bg-[#1a1a2e] rounded-full overflow-hidden">
+                      <span className="text-xs text-slate-600 w-32 truncate">{t.topic}</span>
+                      <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 rounded-full transition-all"
                           style={{ width: `${t.avg}%` }}
@@ -269,8 +270,8 @@ export default function DNAPage() {
               <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
                 {data.recentMistakes.map((m, i) => (
                   <div key={i}
-                    className="bg-[#1a1a2e] border border-[#1e3a5f]/50 rounded-lg p-3 text-xs text-slate-400 leading-relaxed">
-                    <span className="text-violet-400 mr-2">#{i + 1}</span>
+                    className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700 leading-relaxed">
+                    <span className="text-blue-700 mr-2">#{i + 1}</span>
                     {m.replace('MISTAKE: ', '').replace('CODE MISTAKE: ', '').replace('STUDY SESSION: ', '')}
                   </div>
                 ))}
@@ -320,24 +321,24 @@ export default function DNAPage() {
                 ].map((b, i) => (
                   <div key={i} className={`rounded-xl p-4 border ${
                     b.detected
-                      ? 'bg-red-900/20 border-red-800/40'
-                      : 'bg-emerald-900/10 border-emerald-800/20'
+                        ? 'bg-red-50 border-red-200'
+                        : 'bg-emerald-50 border-emerald-200'
                   }`}>
                     <div className="flex items-center gap-2 mb-1">
                       <span>{b.detected ? '🚩' : '✅'}</span>
-                      <span className={`text-sm font-medium ${b.detected ? 'text-red-300' : 'text-emerald-300'}`}>
+                      <span className={`text-sm font-medium ${b.detected ? 'text-red-700' : 'text-emerald-700'}`}>
                         {b.flag}
                       </span>
                       <span className={`ml-auto text-xs px-2 py-0.5 rounded-full ${
                         b.detected
-                          ? 'bg-red-900/50 text-red-400'
-                          : 'bg-emerald-900/50 text-emerald-400'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-emerald-100 text-emerald-700'
                       }`}>
                         {b.detected ? 'Detected' : 'Clear'}
                       </span>
                     </div>
                     {b.detected && (
-                      <p className="text-xs text-slate-400 ml-6">{b.tip}</p>
+                      <p className="text-xs text-slate-600 ml-6">{b.tip}</p>
                     )}
                   </div>
                 ))}
@@ -346,18 +347,18 @@ export default function DNAPage() {
 
             {/* Topic score bar chart */}
             <div className="card">
-              <h2 className="font-semibold text-slate-200 mb-1">Performance by Topic</h2>
+              <h2 className="font-semibold text-slate-900 mb-1">Performance by Topic</h2>
               <p className="text-xs text-slate-500 mb-4">Average quiz scores</p>
               {data?.topicAverages && data.topicAverages.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={data.topicAverages} barSize={24}>
-                    <XAxis dataKey="topic" tick={{ fill: '#94a3b8', fontSize: 10 }}
+                    <XAxis dataKey="topic" tick={{ fill: '#334155', fontSize: 10 }}
                       tickFormatter={v => v.split(' ')[0]} />
-                    <YAxis tick={{ fill: '#94a3b8', fontSize: 10 }} domain={[0, 100]} />
+                    <YAxis tick={{ fill: '#334155', fontSize: 10 }} domain={[0, 100]} />
                     <Tooltip
-                      contentStyle={{ background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 8 }}
-                      labelStyle={{ color: '#f1f5f9' }}
-                      itemStyle={{ color: '#a78bfa' }}
+                      contentStyle={{ background: '#ffffff', border: '1px solid #dbeafe', borderRadius: 8 }}
+                      labelStyle={{ color: '#0f172a' }}
+                      itemStyle={{ color: '#2563eb' }}
                     />
                     <Bar dataKey="avg" radius={[6, 6, 0, 0]}>
                       {(data.topicAverages).map((t, i) => (
@@ -372,20 +373,20 @@ export default function DNAPage() {
 
           {/* Personalised recommendations */}
           <div className="card">
-            <h2 className="font-semibold text-slate-200 mb-4 flex items-center gap-2">
+              <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <span>💡</span> Personalised Recommendations
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {weakTopics.slice(0, 3).length > 0 ? (
                 weakTopics.slice(0, 3).map((t, i) => (
                   <Link key={i} href={`/quiz?topic=${encodeURIComponent(t.topic)}`}
-                    className="bg-[#1a1a2e] hover:bg-[#1e2a4e] border border-[#1e3a5f] rounded-xl p-4 transition-all group">
-                    <div className="text-red-400 text-xs mb-1 font-medium">Needs work</div>
-                    <div className="text-slate-200 font-medium text-sm group-hover:text-violet-300 transition-colors">
+                    className="bg-slate-50 hover:bg-blue-50 border border-slate-200 rounded-xl p-4 transition-all group">
+                    <div className="text-red-700 text-xs mb-1 font-medium">Needs work</div>
+                    <div className="text-slate-900 font-medium text-sm group-hover:text-blue-700 transition-colors">
                       {t.topic}
                     </div>
                     <div className="text-xs text-slate-500 mt-1">Current: {t.avg}% → Target: 80%</div>
-                    <div className="text-xs text-violet-400 mt-2">Quiz now →</div>
+                    <div className="text-xs text-blue-700 mt-2">Quiz now →</div>
                   </Link>
                 ))
               ) : (
@@ -402,27 +403,27 @@ export default function DNAPage() {
       {activeSection === 'timeline' && (
         <div className="space-y-6">
           <div className="card">
-            <h2 className="font-semibold text-slate-200 mb-1">Score Timeline</h2>
+            <h2 className="font-semibold text-slate-900 mb-1">Score Timeline</h2>
             <p className="text-xs text-slate-500 mb-4">Your last 10 quiz attempts</p>
             {timelineData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={timelineData}>
-                  <CartesianGrid stroke="#1e3a5f" strokeDasharray="3 3" />
-                  <XAxis dataKey="attempt" tick={{ fill: '#94a3b8', fontSize: 12 }}
-                    label={{ value: 'Attempt', position: 'insideBottom', fill: '#94a3b8', fontSize: 12 }} />
-                  <YAxis tick={{ fill: '#94a3b8', fontSize: 12 }} domain={[0, 100]} />
+                  <CartesianGrid stroke="#cbd5e1" strokeDasharray="3 3" />
+                  <XAxis dataKey="attempt" tick={{ fill: '#334155', fontSize: 12 }}
+                    label={{ value: 'Attempt', position: 'insideBottom', fill: '#334155', fontSize: 12 }} />
+                  <YAxis tick={{ fill: '#334155', fontSize: 12 }} domain={[0, 100]} />
                   <Tooltip
-                    contentStyle={{ background: '#16213e', border: '1px solid #1e3a5f', borderRadius: 8 }}
-                    labelStyle={{ color: '#f1f5f9' }}
-                    itemStyle={{ color: '#a78bfa' }}
+                    contentStyle={{ background: '#ffffff', border: '1px solid #dbeafe', borderRadius: 8 }}
+                    labelStyle={{ color: '#0f172a' }}
+                    itemStyle={{ color: '#2563eb' }}
                     formatter={(v: number, _: string, props: { payload?: { topic?: string } }) => [
                       `${v}%`, props.payload?.topic ?? 'Score'
                     ]}
                   />
                   <Line type="monotone" dataKey="score"
-                    stroke="#7c3aed" strokeWidth={2.5}
-                    dot={{ fill: '#7c3aed', r: 5 }}
-                    activeDot={{ r: 7, fill: '#a78bfa' }} />
+                    stroke="#2563eb" strokeWidth={2.5}
+                    dot={{ fill: '#2563eb', r: 5 }}
+                    activeDot={{ r: 7, fill: '#60a5fa' }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : <EmptyState msg="Complete quizzes to see your timeline" />}
@@ -430,12 +431,12 @@ export default function DNAPage() {
 
           {/* Quiz history table */}
           <div className="card">
-            <h2 className="font-semibold text-slate-200 mb-4">Quiz History</h2>
+            <h2 className="font-semibold text-slate-900 mb-4">Quiz History</h2>
             {data?.quizHistory && data.quizHistory.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-slate-500 border-b border-[#1e3a5f]">
+                    <tr className="text-left text-xs text-slate-500 border-b border-slate-200">
                       <th className="pb-2 font-medium">Topic</th>
                       <th className="pb-2 font-medium">Score</th>
                       <th className="pb-2 font-medium">Questions</th>
@@ -444,15 +445,15 @@ export default function DNAPage() {
                   </thead>
                   <tbody>
                     {data.quizHistory.map((q, i) => (
-                      <tr key={i} className="border-b border-[#1e3a5f]/30 hover:bg-[#1a1a2e] transition-colors">
-                        <td className="py-2.5 text-slate-300">{q.topic}</td>
+                      <tr key={i} className="border-b border-slate-100 hover:bg-blue-50 transition-colors">
+                        <td className="py-2.5 text-slate-800">{q.topic}</td>
                         <td className="py-2.5">
                           <span className={`font-medium ${
                             q.score >= 80 ? 'text-emerald-400' :
                             q.score >= 50 ? 'text-yellow-400' : 'text-red-400'
                           }`}>{q.score}%</span>
                         </td>
-                        <td className="py-2.5 text-slate-400">{q.total}</td>
+                        <td className="py-2.5 text-slate-600">{q.total}</td>
                         <td className="py-2.5 text-slate-500 text-xs">
                           {new Date(q.timestamp).toLocaleDateString()}
                         </td>
@@ -468,6 +469,7 @@ export default function DNAPage() {
         </div>
       )}
 
+      </div>
     </div>
   )
 }
@@ -519,11 +521,11 @@ function EmptyState({ msg }: { msg: string }) {
 
 function LoadingDNA() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#f7fbff] via-[#f3f8ff] to-[#edf4ff]">
       <div className="text-center">
         <div className="text-4xl mb-4 animate-pulse">🧬</div>
-        <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-slate-400">Analysing your learning DNA...</p>
+        <div className="w-10 h-10 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-slate-600">Analysing your learning DNA...</p>
       </div>
     </div>
   )

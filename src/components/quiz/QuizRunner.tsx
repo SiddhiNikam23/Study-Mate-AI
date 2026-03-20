@@ -79,11 +79,11 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <span className="text-sm text-slate-400">{topic}</span>
+          <span className="text-sm text-slate-600">{topic}</span>
           <span className={`ml-2 badge-${difficulty}`}>{difficulty}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-slate-600">
             {current + 1} / {questions.length}
           </span>
           <div className={`text-2xl font-bold font-mono ${timerColor}`}>
@@ -93,15 +93,15 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-[#1e3a5f] rounded-full mb-8 overflow-hidden">
+      <div className="h-1.5 bg-slate-200 rounded-full mb-8 overflow-hidden">
         <div
-          className="h-full bg-violet-500 rounded-full transition-all duration-300"
+          className="h-full bg-blue-600 rounded-full transition-all duration-300"
           style={{ width: `${((current) / questions.length) * 100}%` }}
         />
       </div>
 
       {/* Timer bar */}
-      <div className="h-1 bg-[#1e3a5f] rounded-full mb-6 overflow-hidden">
+      <div className="h-1 bg-slate-200 rounded-full mb-6 overflow-hidden">
         <div
           className={`h-full ${timerBg} rounded-full transition-all duration-1000`}
           style={{ width: `${(timeLeft / 30) * 100}%` }}
@@ -109,23 +109,23 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
       </div>
 
       {/* Question */}
-      <div className="card mb-6">
-        <p className="text-lg text-slate-100 leading-relaxed">{q.question}</p>
+      <div className="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm mb-6">
+        <p className="text-lg text-slate-900 leading-relaxed">{q.question}</p>
       </div>
 
       {/* Options */}
       <div className="space-y-3 mb-8">
         {q.options.map((opt, i) => {
-          let style = 'border-[#1e3a5f] bg-[#1a1a2e] text-slate-300 hover:border-violet-500 hover:bg-violet-900/20'
+          let style = 'border-slate-200 bg-white text-slate-800 hover:border-blue-400 hover:bg-blue-50'
           if (confirmed) {
             if (i === q.correctAnswer)
-              style = 'border-emerald-500 bg-emerald-900/30 text-emerald-300'
+              style = 'border-emerald-300 bg-emerald-50 text-emerald-700'
             else if (i === selected && i !== q.correctAnswer)
-              style = 'border-red-500 bg-red-900/30 text-red-300'
+              style = 'border-red-300 bg-red-50 text-red-700'
             else
-              style = 'border-[#1e3a5f] bg-[#1a1a2e] text-slate-500 opacity-50'
+              style = 'border-slate-200 bg-slate-50 text-slate-500 opacity-70'
           } else if (selected === i) {
-            style = 'border-violet-500 bg-violet-900/30 text-violet-300'
+            style = 'border-blue-500 bg-blue-50 text-blue-700'
           }
 
           return (
@@ -152,9 +152,9 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
 
       {/* Explanation */}
       {confirmed && q.explanation && (
-        <div className="bg-blue-900/20 border border-blue-700/40 rounded-xl p-4 mb-6">
-          <p className="text-xs font-medium text-blue-400 mb-1">Explanation</p>
-          <p className="text-sm text-slate-300">{q.explanation}</p>
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+          <p className="text-xs font-medium text-blue-700 mb-1">Explanation</p>
+          <p className="text-sm text-slate-700">{q.explanation}</p>
         </div>
       )}
 

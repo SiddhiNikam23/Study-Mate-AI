@@ -45,12 +45,12 @@ export default function HintPanel({ challenge, code, attempts, topic }: Props) {
 
       {/* Hint level indicator */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-400">Hint level:</span>
+        <span className="text-xs text-slate-600">Hint level:</span>
         {[1, 2, 3].map((l) => (
           <div
             key={l}
             className={`w-2 h-2 rounded-full transition-colors ${
-              l < hintLevel ? 'bg-violet-500' : 'bg-[#1e3a5f]'
+              l < hintLevel ? 'bg-blue-600' : 'bg-slate-300'
             }`}
           />
         ))}
@@ -62,17 +62,17 @@ export default function HintPanel({ challenge, code, attempts, topic }: Props) {
       </div>
 
       {/* AI Personalised hint */}
-      <div className="bg-[#1a1a2e] border border-[#1e3a5f] rounded-xl p-4">
+      <div className="bg-white border border-blue-100 rounded-xl p-4 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-violet-400">🧠</span>
-          <span className="text-xs font-medium text-violet-300">Personalised AI Hint</span>
+          <span className="text-blue-600">🧠</span>
+          <span className="text-xs font-medium text-blue-700">Personalised AI Hint</span>
           <span className="text-xs text-slate-500 ml-auto">
             Based on your mistake history
           </span>
         </div>
 
         {hint ? (
-          <p className="text-sm text-slate-300 leading-relaxed">{hint}</p>
+          <p className="text-sm text-slate-700 leading-relaxed">{hint}</p>
         ) : (
           <p className="text-xs text-slate-500">
             Click below to get a hint personalised to your past mistakes.
@@ -98,18 +98,18 @@ export default function HintPanel({ challenge, code, attempts, topic }: Props) {
       {/* Built-in hints */}
       {challenge.hints?.length > 0 && (
         <div>
-          <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+          <h3 className="text-xs font-medium text-slate-600 uppercase tracking-wider mb-2">
             Built-in Hints
           </h3>
           <div className="space-y-2">
             {challenge.hints.map((h, i) => (
-              <div key={i} className="bg-[#1a1a2e] rounded-lg border border-[#1e3a5f]/50">
+              <div key={i} className="bg-white rounded-lg border border-slate-200">
                 {revealedBuiltin.includes(i) ? (
-                  <div className="p-3 text-sm text-slate-300">{h}</div>
+                  <div className="p-3 text-sm text-slate-700">{h}</div>
                 ) : (
                   <button
                     onClick={() => setRevealedBuiltin((r) => [...r, i])}
-                    className="w-full p-3 text-left text-sm text-slate-500 hover:text-slate-300 transition-colors"
+                    className="w-full p-3 text-left text-sm text-slate-500 hover:text-slate-800 transition-colors"
                   >
                     Hint {i + 1} — click to reveal
                   </button>
@@ -121,9 +121,9 @@ export default function HintPanel({ challenge, code, attempts, topic }: Props) {
       )}
 
       {/* Memory note */}
-      <div className="bg-amber-900/10 border border-amber-800/30 rounded-xl p-3">
-        <p className="text-xs text-amber-400 font-medium mb-1">⚠️ Mistake logged</p>
-        <p className="text-xs text-slate-500">
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+        <p className="text-xs text-amber-700 font-medium mb-1">⚠️ Mistake logged</p>
+        <p className="text-xs text-slate-600">
           Each hint request is stored in Hindsight memory. Future challenges will be
           adjusted based on where you get stuck.
         </p>

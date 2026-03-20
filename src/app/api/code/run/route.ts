@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { code, testCases } = await req.json()
+    const { code, testCases, topic = 'General', problemTitle = 'Coding Challenge' } = await req.json()
+
+    const { logCodeMistake } = await import('@/lib/hindsight')
+    const { DEMO_USER_ID } = await import('@/lib/constants')
 
     // For hackathon demo: simulate running by checking
     // if the code contains meaningful implementation
@@ -11,6 +14,13 @@ export async function POST(req: NextRequest) {
       !code.includes('# Your code here')
 
     if (!hasImplementation) {
+      await logCodeMistake(
+        DEMO_USER_ID,
+        problemTitle,
+        'No implementation found',
+        code,
+        topic
+      )
       return NextResponse.json({
         output: 'No implementation found. Write your solution and try again.',
         passed: false,
@@ -51,6 +61,16 @@ Respond ONLY with JSON:
     )
     const clean = raw.replace(/```json|```/g, '').trim()
     const result = JSON.parse(clean)
+
+    if (!result.passed) {
+      await logCodeMistake(
+        DEMO_USER_ID,
+        problemTitle,
+        result.output || 'Wrong output or logic error',
+        code,
+        topic
+      )
+    }
 
     return NextResponse.json(result)
   } catch (err) {

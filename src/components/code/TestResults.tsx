@@ -2,9 +2,36 @@ interface Props {
   output: string
   testCases: { input: string; expected: string }[]
   solved: boolean
+  topic?: string
+  challengeTitle?: string
+  failedAttempts?: number
+  loadingGuide?: boolean
+  onRetryConcept?: () => void
+  studyGuide?: {
+    title: string
+    weakConcepts: string[]
+    stepsToReview: string[]
+    retryChecklist: string[]
+    motivationLine: string
+  } | null
 }
 
-export default function TestResults({ output, testCases, solved }: Props) {
+export default function TestResults({
+  output,
+  testCases,
+  solved,
+  topic = '',
+  challengeTitle = '',
+  failedAttempts = 0,
+  loadingGuide = false,
+  onRetryConcept,
+  studyGuide = null,
+}: Props) {
+  const weakConceptsParam = studyGuide?.weakConcepts?.length
+    ? encodeURIComponent(studyGuide.weakConcepts.join('|'))
+    : ''
+  const studyHref = `/code/study?topic=${encodeURIComponent(topic)}&challenge=${encodeURIComponent(challengeTitle)}&weakConcepts=${weakConceptsParam}`
+
   if (!output) {
     return (
       <div className="text-center py-12">
@@ -26,6 +53,69 @@ export default function TestResults({ output, testCases, solved }: Props) {
         <div className="bg-red-900/20 border border-red-700/30 rounded-xl p-3">
           <p className="text-red-400 text-sm font-medium">Some tests failed</p>
           <p className="text-xs text-slate-400 mt-0.5">Check the output below and use hints if needed.</p>
+        </div>
+      )}
+
+      {!solved && failedAttempts >= 3 && (
+        <div className="bg-amber-900/20 border border-amber-700/40 rounded-xl p-4">
+          <p className="text-amber-300 font-medium text-sm mb-1">Study Guide Unlocked (after 3 attempts)</p>
+          <p className="text-xs text-slate-400 mb-3">
+            Study the following topics and retry the concept.
+          </p>
+
+          {loadingGuide ? (
+            <p className="text-xs text-amber-200">Preparing your personalised study guide...</p>
+          ) : studyGuide ? (
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-amber-200 font-medium mb-1">{studyGuide.title}</p>
+                <div className="flex flex-wrap gap-2">
+                  {studyGuide.weakConcepts.map((c) => (
+                    <span
+                      key={c}
+                      className="text-[11px] bg-amber-900/30 border border-amber-800/50 px-2 py-1 rounded-lg text-amber-200"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-300 mb-1">What to study now</p>
+                <div className="space-y-1">
+                  {studyGuide.stepsToReview.map((step, index) => (
+                    <p key={`${step}-${index}`} className="text-xs text-slate-400">{index + 1}. {step}</p>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-300 mb-1">Before retry checklist</p>
+                <div className="space-y-1">
+                  {studyGuide.retryChecklist.map((item, index) => (
+                    <p key={`${item}-${index}`} className="text-xs text-slate-400">• {item}</p>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-xs text-emerald-300">{studyGuide.motivationLine}</p>
+
+              <button
+                onClick={onRetryConcept}
+                className="btn-primary text-sm px-4 py-2"
+              >
+                Re-try The Concept →
+              </button>
+              <a href={studyHref} className="btn-secondary text-sm px-4 py-2 inline-block">
+                Start Study →
+              </a>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-400">
+              Study arrays/edge cases/dry runs for this topic, then retry the concept.
+            </p>
+          )}
         </div>
       )}
 

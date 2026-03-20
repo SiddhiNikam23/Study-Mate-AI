@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { QuizQuestion, QuizAttempt } from '@/types'
 
 interface Props {
@@ -16,8 +16,8 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
   const [confirmed, setConfirmed] = useState(false)
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
   const [timeLeft, setTimeLeft] = useState(30)
-  const [startTime] = useState(Date.now())
-  const [qStartTime, setQStartTime] = useState(Date.now())
+  const startTimeRef = useRef(0)
+  const qStartTimeRef = useRef(0)
 
   const q = questions[current]
   const isLast = current === questions.length - 1
@@ -25,13 +25,14 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
   // Auto-submit when timer runs out
   const handleConfirm = useCallback((forced = false) => {
     if (confirmed && !forced) return
-    const timeSpent = Math.round((Date.now() - qStartTime) / 1000)
+    const timeSpent = Math.round((Date.now() - qStartTimeRef.current) / 1000)
     const answer = forced ? -1 : (selected ?? -1)
     const attempt: QuizAttempt = {
       questionId: q.id,
       question: q.question,
       topic: q.topic,
       options: q.options,
+      explanation: q.explanation,
       userAnswer: answer,
       correctAnswer: q.correctAnswer,
       isCorrect: answer === q.correctAnswer,
@@ -44,17 +45,15 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
 
     if (isLast) {
       setTimeout(() => {
-        onComplete(newAttempts, Math.round((Date.now() - startTime) / 1000))
+        onComplete(newAttempts, Math.round((Date.now() - startTimeRef.current) / 1000))
       }, 1200)
     }
-  }, [confirmed, selected, q, attempts, isLast, qStartTime, startTime, onComplete])
+  }, [confirmed, selected, q, attempts, isLast, onComplete])
 
   useEffect(() => {
-    setTimeLeft(30)
-    setSelected(null)
-    setConfirmed(false)
-    setQStartTime(Date.now())
-  }, [current])
+    startTimeRef.current = Date.now()
+    qStartTimeRef.current = Date.now()
+  }, [])
 
   useEffect(() => {
     if (confirmed) return
@@ -65,6 +64,10 @@ export default function QuizRunner({ questions, topic, difficulty, onComplete }:
 
   function next() {
     if (!confirmed) return
+    setTimeLeft(30)
+    setSelected(null)
+    setConfirmed(false)
+    qStartTimeRef.current = Date.now()
     setCurrent((c) => c + 1)
   }
 

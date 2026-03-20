@@ -92,12 +92,19 @@ export async function logCodeMistake(
   userId: string,
   problemTitle: string,
   errorType: string,
-  code: string
+  code: string,
+  topic?: string
 ) {
   await rememberFact(
     userId,
-    `CODE MISTAKE: User failed "${problemTitle}" with error type "${errorType}".`,
-    { type: 'code_mistake', errorType, problemTitle, timestamp: String(Date.now()) }  // ← String()
+    `CODE MISTAKE: User failed "${problemTitle}" in topic "${topic ?? 'General'}" with error type "${errorType}".`,
+    {
+      type: 'code_mistake',
+      topic: topic ?? 'General',
+      errorType,
+      problemTitle,
+      timestamp: String(Date.now())
+    }  // ← String()
   )
 }
 

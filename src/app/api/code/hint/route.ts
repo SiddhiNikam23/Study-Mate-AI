@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
 
     // Log this as a code mistake in Hindsight
     if (error) {
-      await logCodeMistake(userId, problemTitle, error, code)
+      await logCodeMistake(userId, problemTitle, error, code, topic)
     }
 
     // Recall past mistakes for personalised hint

@@ -15,6 +15,14 @@ interface Props {
 
 type Tab = 'problem' | 'hints' | 'results'
 
+interface CodeStudyGuide {
+  title: string
+  weakConcepts: string[]
+  stepsToReview: string[]
+  retryChecklist: string[]
+  motivationLine: string
+}
+
 export default function CodeEditor({ challenge, topic, difficulty, onExit }: Props) {
   const [code, setCode] = useState(challenge.starterCode)
   const [activeTab, setActiveTab] = useState<Tab>('problem')
@@ -22,7 +30,36 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
   const [running, setRunning] = useState(false)
   const [solved, setSolved] = useState(false)
   const [attempts, setAttempts] = useState(0)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [studyGuide, setStudyGuide] = useState<CodeStudyGuide | null>(null)
+  const [loadingGuide, setLoadingGuide] = useState(false)
   const editorRef = useRef<unknown>(null)
+
+  async function fetchStudyGuide(nextFailedAttempts: number, latestOutput: string) {
+    setLoadingGuide(true)
+    try {
+      const res = await fetch('/api/code/study-guide', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          title: challenge.title,
+          description: challenge.description,
+          code,
+          output: latestOutput,
+          attempts: nextFailedAttempts,
+        }),
+      })
+      const data = await res.json()
+      if (data.success && data.guide) {
+        setStudyGuide(data.guide)
+      }
+    } catch {
+      // Keep silent fallback; UI still works without guide.
+    } finally {
+      setLoadingGuide(false)
+    }
+  }
 
   async function runCode() {
     setRunning(true)
@@ -37,14 +74,31 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
           code,
           testCases: challenge.testCases,
           language: 'python',
+          topic,
+          problemTitle: challenge.title,
         }),
       })
       const data = await res.json()
       setOutput(data.output ?? 'No output')
-      if (data.passed) setSolved(true)
+      if (data.passed) {
+        setSolved(true)
+        setStudyGuide(null)
+      } else {
+        setSolved(false)
+        const nextFailedAttempts = failedAttempts + 1
+        setFailedAttempts(nextFailedAttempts)
+        if (nextFailedAttempts >= 3) {
+          void fetchStudyGuide(nextFailedAttempts, data.output ?? 'No output')
+        }
+      }
       setActiveTab('results')
     } catch {
       setOutput('Error running code. Check the console.')
+      const nextFailedAttempts = failedAttempts + 1
+      setFailedAttempts(nextFailedAttempts)
+      if (nextFailedAttempts >= 3) {
+        void fetchStudyGuide(nextFailedAttempts, 'Error running code. Check the console.')
+      }
       setActiveTab('results')
     } finally {
       setRunning(false)
@@ -124,6 +178,12 @@ export default function CodeEditor({ challenge, topic, difficulty, onExit }: Pro
                 output={output}
                 testCases={challenge.testCases}
                 solved={solved}
+                topic={topic}
+                challengeTitle={challenge.title}
+                failedAttempts={failedAttempts}
+                studyGuide={studyGuide}
+                loadingGuide={loadingGuide}
+                onRetryConcept={() => setActiveTab('problem')}
               />
             )}
           </div>

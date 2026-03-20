@@ -18,12 +18,39 @@ export interface QuizAttempt {
   questionId: string
   question: string
   topic: string
-  options?: string[]  
+  options?: string[]
   userAnswer: number
   correctAnswer: number
   isCorrect: boolean
   timeSpent: number
   timestamp: number
+  explanation?: string
+}
+
+export interface AdaptiveStudyGuide {
+  weakTopics: string[]
+  focusPoints: string[]
+  mistakeFixes: {
+    question: string
+    yourAnswer: string
+    correctAnswer: string
+    explanation: string
+  }[]
+  checklist: string[]
+}
+
+export interface AdaptiveStudyPlanDay {
+  day: number
+  title: string
+  recommendedMinutes: number
+  tasks: string[]
+}
+
+export interface QuizRemediation {
+  weakTopics: string[]
+  practiceQuestions: QuizQuestion[]
+  studyGuide: AdaptiveStudyGuide | null
+  studyPlan: AdaptiveStudyPlanDay[]
 }
 
 export interface CodeChallenge {

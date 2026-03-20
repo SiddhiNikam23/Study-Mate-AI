@@ -1,16 +1,29 @@
 'use client'
 
 import Link from 'next/link'
-import { QuizAttempt } from '@/types'
+import { QuizAttempt, QuizRemediation } from '@/types'
 
 interface Props {
   attempts: QuizAttempt[]
   score: number
   topic: string
+  remediation: QuizRemediation | null
+  buildingRemediation: boolean
+  onStartPractice: () => void
+  practiceRound: number
   onRestart: () => void
 }
 
-export default function QuizResults({ attempts, score, topic, onRestart }: Props) {
+export default function QuizResults({
+  attempts,
+  score,
+  topic,
+  remediation,
+  buildingRemediation,
+  onStartPractice,
+  practiceRound,
+  onRestart,
+}: Props) {
   const correct = attempts.filter((a) => a.isCorrect).length
   const wrong = attempts.filter((a) => !a.isCorrect)
 
@@ -61,6 +74,128 @@ export default function QuizResults({ attempts, score, topic, onRestart }: Props
           </p>
         </div>
       </div>
+
+      {/* Adaptive remediation */}
+      {wrong.length > 0 && (
+        <div className="card mb-6 border border-violet-700/30">
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <h2 className="font-semibold text-slate-200">Adaptive Recovery Plan</h2>
+            <span className="text-xs bg-violet-900/40 text-violet-300 px-2 py-1 rounded-full border border-violet-700/40">
+              {practiceRound > 0 ? `Practice Round ${practiceRound}` : 'Round 1 Ready'}
+            </span>
+          </div>
+
+          {buildingRemediation ? (
+            <div className="bg-violet-900/15 border border-violet-800/30 rounded-xl p-4">
+              <p className="text-sm text-violet-300 font-medium">Building your personalised practice...</p>
+              <p className="text-xs text-slate-400 mt-1">
+                Analysing wrong answers to generate weak-topic questions, a study guide, and a focused plan.
+              </p>
+            </div>
+          ) : (
+            <>
+              {remediation?.weakTopics?.length ? (
+                <div className="mb-4">
+                  <p className="text-xs text-slate-400 mb-2">Weak topics detected</p>
+                  <div className="flex flex-wrap gap-2">
+                    {remediation.weakTopics.map((weakTopic) => (
+                      <span
+                        key={weakTopic}
+                        className="text-xs bg-red-900/30 text-red-300 border border-red-700/40 px-2 py-1 rounded-lg"
+                      >
+                        {weakTopic}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {remediation?.studyGuide && (
+                <div className="bg-[#1a1a2e] border border-[#1e3a5f] rounded-xl p-4 mb-4">
+                  <p className="text-sm font-medium text-violet-300 mb-2">Study Guide for Your Wrong Topics</p>
+                  {remediation.studyGuide.focusPoints.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-slate-400 mb-1">Focus on these questions/concepts</p>
+                      <div className="space-y-1">
+                        {remediation.studyGuide.focusPoints.map((point, index) => (
+                          <p key={`${point}-${index}`} className="text-xs text-slate-300">
+                            {index + 1}. {point}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {remediation.studyGuide.mistakeFixes.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-slate-400 mb-1">Wrong answer fixes</p>
+                      <div className="space-y-2">
+                        {remediation.studyGuide.mistakeFixes.slice(0, 3).map((fix, index) => (
+                          <div key={`${fix.question}-${index}`} className="bg-slate-900/40 rounded-lg p-2.5">
+                            <p className="text-xs text-slate-300">{fix.question}</p>
+                            <p className="text-xs text-red-300 mt-1">Your answer: {fix.yourAnswer}</p>
+                            <p className="text-xs text-emerald-300">Correct: {fix.correctAnswer}</p>
+                            <p className="text-xs text-slate-400 mt-1">{fix.explanation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {remediation.studyGuide.checklist.length > 0 && (
+                    <div>
+                      <p className="text-xs text-slate-400 mb-1">Quick revision checklist</p>
+                      <div className="space-y-1">
+                        {remediation.studyGuide.checklist.slice(0, 4).map((item, index) => (
+                          <p key={`${item}-${index}`} className="text-xs text-slate-300">• {item}</p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {remediation?.studyPlan?.length ? (
+                <div className="bg-cyan-900/10 border border-cyan-800/30 rounded-xl p-4 mb-4">
+                  <p className="text-sm font-medium text-cyan-300 mb-2">Auto-Created Study Plan</p>
+                  <div className="space-y-2.5">
+                    {remediation.studyPlan.map((day) => (
+                      <div key={day.day} className="bg-[#1a1a2e] rounded-lg p-3 border border-[#1e3a5f]">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <p className="text-xs font-medium text-slate-200">
+                            Day {day.day}: {day.title}
+                          </p>
+                          <span className="text-[11px] text-cyan-300">{day.recommendedMinutes} min</span>
+                        </div>
+                        <div className="space-y-1">
+                          {day.tasks.map((task, index) => (
+                            <p key={`${task}-${index}`} className="text-xs text-slate-400">• {task}</p>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={onStartPractice}
+                  disabled={!remediation?.practiceQuestions?.length}
+                  className="btn-primary py-2.5 px-4 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {remediation?.practiceQuestions?.length
+                    ? `Practice Weak Topics (${remediation.practiceQuestions.length} Q) →`
+                    : 'Practice questions unavailable'}
+                </button>
+                <Link href="/study-plan" className="btn-secondary py-2.5 px-4 text-center">
+                  Open Full Study Plan
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Wrong answers review */}
       {wrong.length > 0 && (

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import TopicSelector from '@/components/quiz/TopicSelector'
 import QuizRunner from '@/components/quiz/QuizRunner'
 import QuizResults from '@/components/quiz/QuizResults'
-import { QuizQuestion, QuizAttempt } from '@/types'
+import { QuizQuestion, QuizAttempt, QuizRemediation } from '@/types'
 import { TOPICS } from '@/lib/constants'
 
 type Stage = 'select' | 'running' | 'results'
@@ -17,11 +17,16 @@ export default function QuizPage() {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
   const [loading, setLoading] = useState(false)
   const [score, setScore] = useState(0)
+  const [remediation, setRemediation] = useState<QuizRemediation | null>(null)
+  const [buildingRemediation, setBuildingRemediation] = useState(false)
+  const [practiceRound, setPracticeRound] = useState(0)
 
   async function startQuiz(topic: string, diff: 'easy' | 'medium' | 'hard') {
     setLoading(true)
     setSelectedTopic(topic)
     setDifficulty(diff)
+    setRemediation(null)
+    setPracticeRound(0)
     try {
       const res = await fetch('/api/quiz/generate', {
         method: 'POST',
@@ -45,10 +50,13 @@ export default function QuizPage() {
   async function submitQuiz(finalAttempts: QuizAttempt[], totalTime: number) {
     setAttempts(finalAttempts)
     const correct = finalAttempts.filter((a) => a.isCorrect).length
-    setScore(Math.round((correct / finalAttempts.length) * 100))
+    const latestScore = Math.round((correct / finalAttempts.length) * 100)
+    setScore(latestScore)
 
-    // Submit to API — logs to Hindsight in background
-    await fetch('/api/quiz/submit', {
+    setStage('results')
+
+    // Submit score and prepare adaptive remediation in parallel.
+    const submitPromise = fetch('/api/quiz/submit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -57,7 +65,56 @@ export default function QuizPage() {
         totalTime,
       }),
     })
-    setStage('results')
+
+    const hasWrongAnswers = finalAttempts.some((attempt) => !attempt.isCorrect)
+
+    if (hasWrongAnswers) {
+      setBuildingRemediation(true)
+      try {
+        const remediationRes = await fetch('/api/quiz/remediate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            attempts: finalAttempts,
+            topic: selectedTopic,
+            difficulty,
+            totalTime,
+            score: latestScore,
+          }),
+        })
+        const remediationData = await remediationRes.json()
+        if (remediationData.success) {
+          setRemediation({
+            weakTopics: remediationData.weakTopics ?? [],
+            practiceQuestions: remediationData.practiceQuestions ?? [],
+            studyGuide: remediationData.studyGuide ?? null,
+            studyPlan: remediationData.studyPlan ?? [],
+          })
+        } else {
+          setRemediation(null)
+        }
+      } catch {
+        setRemediation(null)
+      } finally {
+        setBuildingRemediation(false)
+      }
+    } else {
+      setRemediation(null)
+      setBuildingRemediation(false)
+    }
+
+    await submitPromise
+  }
+
+  function startAdaptivePractice() {
+    if (!remediation?.practiceQuestions?.length) return
+
+    setQuestions(remediation.practiceQuestions)
+    if (remediation.weakTopics.length > 0) {
+      setSelectedTopic(`Adaptive Practice: ${remediation.weakTopics.join(', ')}`)
+    }
+    setPracticeRound((value) => value + 1)
+    setStage('running')
   }
 
   function restart() {
@@ -65,6 +122,9 @@ export default function QuizPage() {
     setQuestions([])
     setAttempts([])
     setScore(0)
+    setRemediation(null)
+    setBuildingRemediation(false)
+    setPracticeRound(0)
   }
 
   return (
@@ -89,6 +149,10 @@ export default function QuizPage() {
           attempts={attempts}
           score={score}
           topic={selectedTopic}
+          remediation={remediation}
+          buildingRemediation={buildingRemediation}
+          onStartPractice={startAdaptivePractice}
+          practiceRound={practiceRound}
           onRestart={restart}
         />
       )}

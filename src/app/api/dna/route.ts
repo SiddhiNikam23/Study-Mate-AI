@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getUserDNASummary, recallMemories } from '@/lib/hindsight'
 import { getStreak, getQuizHistory } from '@/lib/redis'
 import { DEMO_USER_ID } from '@/lib/constants'
 
@@ -7,14 +6,35 @@ export async function GET(req: NextRequest) {
   try {
     const userId = DEMO_USER_ID
 
-    const [dnaSummary, recentMistakes, streak, quizHistory] = await Promise.all([
-      getUserDNASummary(userId),
-      recallMemories(userId, 'recent mistakes and errors', 10),
+    // Redis always works
+    const [streak, quizHistory] = await Promise.all([
       getStreak(userId),
       getQuizHistory(userId),
     ])
 
-    // Build topic score map from quiz history
+    // Try Hindsight — gracefully skip if unavailable
+    let dnaSummary = ''
+    let recentMistakes: string[] = []
+
+    try {
+      const { getUserDNASummary, recallMemories } = await import('@/lib/hindsight')
+      const [summary, memories] = await Promise.all([
+        getUserDNASummary(userId),
+        recallMemories(userId, 'recent mistakes and errors', 10),
+      ])
+      dnaSummary = summary
+      recentMistakes = memories
+        .map((m) => (m as { content?: string; text?: string }).content
+          ?? (m as { content?: string; text?: string }).text ?? '')
+        .filter(Boolean)
+    } catch {
+      console.warn('Hindsight unavailable — returning Redis data only')
+      dnaSummary = quizHistory.length > 0
+        ? `You have completed ${quizHistory.length} quiz session(s). Complete more quizzes to build your full DNA profile.`
+        : 'No study sessions yet. Take a quiz to start building your learning DNA!'
+    }
+
+    // Build topic averages from quiz history
     const topicScores: Record<string, number[]> = {}
     quizHistory.forEach((q: { topic: string; score: number }) => {
       if (!topicScores[q.topic]) topicScores[q.topic] = []
@@ -29,13 +49,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       dnaSummary,
-      recentMistakes: recentMistakes.map((m) => m.content),
+      recentMistakes,
       streak,
       topicAverages,
       quizHistory,
     })
   } catch (err) {
     console.error('DNA fetch error:', err)
-    return NextResponse.json({ success: false, error: 'Failed to fetch DNA' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: String(err) },
+      { status: 500 }
+    )
   }
 }

@@ -1,52 +1,67 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateWithGroq } from '@/lib/groq'
-import { recallMemories } from '@/lib/hindsight'
 import { DEMO_USER_ID } from '@/lib/constants'
 
 export async function POST(req: NextRequest) {
   try {
     const { topic, difficulty = 'medium', count = 5 } = await req.json()
-    const userId = DEMO_USER_ID
 
-    // Pull past mistakes from Hindsight memory
-    const memories = await recallMemories(
-      userId,
-      `mistakes and weak areas in ${topic}`,
-      5
-    )
-    const mistakeContext = memories.map((m) => m.content).join('\n')
+    // Try to get memories — but don't crash if Hindsight fails
+    let mistakeContext = ''
+    try {
+      const { recallMemories } = await import('@/lib/hindsight')
+      const memories = await recallMemories(DEMO_USER_ID, `mistakes in ${topic}`, 5)
+      mistakeContext = memories.map((m) => m.content ?? m.text ?? '').join('\n')
+    } catch {
+      console.warn('Hindsight recall skipped — generating standard questions')
+    }
 
     const systemPrompt = `You are an expert quiz generator for computer science students.
-Generate targeted quiz questions based on the student's past mistakes.
-Always respond with valid JSON only — no markdown, no explanation.`
+Generate targeted quiz questions. Always respond with valid JSON only — no markdown, no backticks, no explanation.`
 
     const userPrompt = `Generate ${count} MCQ questions on topic: "${topic}" at ${difficulty} difficulty.
 
-Student's past mistakes in this area:
-${mistakeContext || 'No past mistakes recorded yet — generate standard questions.'}
+${mistakeContext ? `Student past mistakes:\n${mistakeContext}\n\nTarget questions at these weak areas.` : 'Generate standard questions covering key concepts.'}
 
-Return ONLY this JSON structure:
+Return ONLY this JSON — no other text:
 {
   "questions": [
     {
       "id": "q1",
-      "question": "Question text here?",
+      "question": "Question text?",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": 0,
       "topic": "${topic}",
       "difficulty": "${difficulty}",
-      "explanation": "Brief explanation of why the answer is correct"
+      "explanation": "Why this answer is correct"
     }
   ]
 }`
 
     const raw = await generateWithGroq(systemPrompt, userPrompt, 2000)
-    const clean = raw.replace(/```json|```/g, '').trim()
-    const parsed = JSON.parse(clean)
+    console.log('Groq raw (first 300):', raw.substring(0, 300))
 
-    return NextResponse.json({ success: true, ...parsed })
+    // Clean and parse
+    let clean = raw.trim()
+    // Remove markdown fences if present
+    clean = clean.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+    // Find JSON object
+    const start = clean.indexOf('{')
+    const end = clean.lastIndexOf('}')
+    if (start === -1 || end === -1) throw new Error('No JSON found in response')
+    clean = clean.substring(start, end + 1)
+
+    const parsed = JSON.parse(clean)
+    if (!parsed.questions || !Array.isArray(parsed.questions)) {
+      throw new Error('Invalid questions format')
+    }
+
+    return NextResponse.json({ success: true, questions: parsed.questions })
   } catch (err) {
-    console.error('Quiz generate error:', err)
-    return NextResponse.json({ success: false, error: 'Failed to generate quiz' }, { status: 500 })
+    console.error('Quiz generate error:', String(err))
+    return NextResponse.json(
+      { success: false, error: String(err) },
+      { status: 500 }
+    )
   }
 }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { logMistake, logStudySession } from '@/lib/hindsight'
 import { saveQuizResult, updateStreak } from '@/lib/redis'
 import { QuizAttempt } from '@/types'
 import { DEMO_USER_ID } from '@/lib/constants'
@@ -16,40 +15,48 @@ export async function POST(req: NextRequest) {
     const correct = attempts.filter((a) => a.isCorrect).length
     const score = Math.round((correct / attempts.length) * 100)
 
-    // Log each mistake to Hindsight memory
-    const mistakePromises = attempts
-      .filter((a) => !a.isCorrect)
-      .map((a) =>
-        logMistake(
-          userId,
-          a.topic,
-          a.question,
-          a.options?.[a.userAnswer] ?? String(a.userAnswer),
-          a.options?.[a.correctAnswer] ?? String(a.correctAnswer)
-        )
-      )
-
-    // Log the full session to Hindsight
+    // Redis always works — save this first
     await Promise.all([
-      ...mistakePromises,
-      logStudySession(userId, topic, score, totalTime),
       saveQuizResult(userId, topic, score, attempts.length),
       updateStreak(userId),
     ])
+
+    // Try Hindsight — but never crash if it fails
+    try {
+      const { logMistake, logStudySession } = await import('@/lib/hindsight')
+      const wrongAttempts = attempts.filter((a) => !a.isCorrect)
+
+      await Promise.allSettled([
+        ...wrongAttempts.map((a) =>
+          logMistake(
+            userId,
+            a.topic,
+            a.question,
+            a.options?.[a.userAnswer] ?? String(a.userAnswer),
+            a.options?.[a.correctAnswer] ?? String(a.correctAnswer)
+          )
+        ),
+        logStudySession(userId, topic, score, totalTime),
+      ])
+    } catch {
+      console.warn('Hindsight logging skipped — score still saved to Redis')
+    }
 
     return NextResponse.json({
       success: true,
       score,
       correct,
       total: attempts.length,
-      message: score >= 80
-        ? 'Great job! Keep it up.'
-        : score >= 50
-        ? 'Good effort. Review the mistakes and try again.'
-        : 'Needs improvement. StudyMate has updated your study plan.',
+      message:
+        score >= 80 ? 'Great job! Keep it up.' :
+        score >= 50 ? 'Good effort. Review the mistakes.' :
+        'Needs improvement. Your study plan has been updated.',
     })
   } catch (err) {
     console.error('Quiz submit error:', err)
-    return NextResponse.json({ success: false, error: 'Submit failed' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: String(err) },
+      { status: 500 }
+    )
   }
 }

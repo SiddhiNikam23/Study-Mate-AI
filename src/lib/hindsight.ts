@@ -2,40 +2,49 @@ const HINDSIGHT_API_KEY = process.env.HINDSIGHT_API_KEY!
 const HINDSIGHT_BASE_URL = process.env.HINDSIGHT_BASE_URL!
 
 interface HindsightMemory {
-  content: string
+  text?: string
+  content?: string
   metadata?: Record<string, unknown>
 }
 
-// ─── Core API helpers ────────────────────────────────────────────────────────
-
-function bankUrl(bankId: string, path: string) {
-  return `${HINDSIGHT_BASE_URL}/v1/default/banks/${bankId}${path}`
-}
-
-function headers() {
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${HINDSIGHT_API_KEY}`,
+async function hindsightPost(path: string, body: object): Promise<unknown> {
+  try {
+    const url = `${HINDSIGHT_BASE_URL}${path}`
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${HINDSIGHT_API_KEY}`,
+      },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) {
+      const errText = await res.text()
+      console.warn(`Hindsight ${path} → ${res.status}: ${errText}`)
+      return null
+    }
+    return res.json()
+  } catch (err) {
+    console.warn(`Hindsight ${path} failed — skipping:`, err)
+    return null
   }
 }
-
-// ─── Primitives ──────────────────────────────────────────────────────────────
 
 export async function rememberFact(
   userId: string,
   content: string,
   metadata?: Record<string, unknown>
 ) {
-  const res = await fetch(bankUrl(`user_${userId}`, '/memories/retain'), {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({
-      content,
-      metadata: metadata ?? {},
-    }),
-  })
-  if (!res.ok) throw new Error(`Hindsight retain failed: ${res.status}`)
-  return res.json()
+  const bankId = `user_${userId}`
+  // Correct endpoint: POST /v1/default/banks/{bank_id}/memories
+  // Body uses "items" array
+  return hindsightPost(
+    `/v1/default/banks/${bankId}/memories`,
+    {
+      items: [{ content, metadata: metadata ?? {} }],
+      async: true  // process in background — faster response
+    }
+  )
 }
 
 export async function recallMemories(
@@ -43,37 +52,27 @@ export async function recallMemories(
   query: string,
   limit = 10
 ): Promise<HindsightMemory[]> {
-  const res = await fetch(bankUrl(`user_${userId}`, '/memories/recall'), {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({ query, limit }),
-  })
-  if (!res.ok) {
-    console.warn(`Hindsight recall failed: ${res.status}`)
-    return []
-  }
-  const data = await res.json()
-  return data.memories ?? data.results ?? []
+  const bankId = `user_${userId}`
+  const data = await hindsightPost(
+    `/v1/default/banks/${bankId}/memories/recall`,
+    { query, max_tokens: 1000 }
+  ) as { results?: HindsightMemory[] } | null
+
+  return data?.results ?? []
 }
 
 export async function reflectOnMemories(
   userId: string,
   query: string
 ): Promise<string> {
-  const res = await fetch(bankUrl(`user_${userId}`, '/reflect'), {
-    method: 'POST',
-    headers: headers(),
-    body: JSON.stringify({ query }),
-  })
-  if (!res.ok) {
-    console.warn(`Hindsight reflect failed: ${res.status}`)
-    return ''
-  }
-  const data = await res.json()
-  return data.response ?? data.reflection ?? ''
-}
+  const bankId = `user_${userId}`
+  const data = await hindsightPost(
+    `/v1/default/banks/${bankId}/reflect`,
+    { query, budget: 'low' }
+  ) as { text?: string } | null
 
-// ─── High-level helpers ──────────────────────────────────────────────────────
+  return data?.text ?? ''
+}
 
 export async function logMistake(
   userId: string,
@@ -84,8 +83,8 @@ export async function logMistake(
 ) {
   await rememberFact(
     userId,
-    `MISTAKE: User got "${question}" wrong. They answered "${wrongAnswer}" but correct answer is "${correctAnswer}". Topic: ${topic}`,
-    { type: 'mistake', topic, timestamp: Date.now() }
+    `MISTAKE: User got "${question}" wrong. Answered "${wrongAnswer}" but correct is "${correctAnswer}". Topic: ${topic}`,
+    { type: 'mistake', topic, timestamp: String(Date.now()) }  // ← String()
   )
 }
 
@@ -97,8 +96,8 @@ export async function logCodeMistake(
 ) {
   await rememberFact(
     userId,
-    `CODE MISTAKE: User failed "${problemTitle}" with error type "${errorType}". Code pattern logged.`,
-    { type: 'code_mistake', errorType, problemTitle, timestamp: Date.now() }
+    `CODE MISTAKE: User failed "${problemTitle}" with error type "${errorType}".`,
+    { type: 'code_mistake', errorType, problemTitle, timestamp: String(Date.now()) }  // ← String()
   )
 }
 
@@ -110,14 +109,20 @@ export async function logStudySession(
 ) {
   await rememberFact(
     userId,
-    `STUDY SESSION: Completed ${topic} quiz. Score: ${score}%. Time spent: ${timeSpent}s.`,
-    { type: 'session', topic, score, timeSpent, timestamp: Date.now() }
+    `STUDY SESSION: Completed ${topic} quiz. Score: ${score}%. Time: ${timeSpent}s.`,
+    {                                    // ← all numbers → strings
+      type: 'session',
+      topic,
+      score: String(score),
+      timeSpent: String(timeSpent),
+      timestamp: String(Date.now())
+    }
   )
 }
 
 export async function getUserDNASummary(userId: string): Promise<string> {
   return reflectOnMemories(
     userId,
-    "Summarize this student's: weak topics, recurring mistake patterns, coding errors, and behaviour (time management, hint usage, skip rate). Be specific and structured."
+    "Summarize this student's weak topics, recurring mistake patterns, coding errors, and behaviour. Be specific and structured."
   )
 }
